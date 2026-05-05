@@ -9,7 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SiteRouteImport } from './routes/_site'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as SiteIndexRouteImport } from './routes/_site.index'
 import { Route as SiteTrackRouteImport } from './routes/_site.track'
 import { Route as SiteTermsRouteImport } from './routes/_site.terms'
@@ -27,9 +29,19 @@ import { Route as SiteOrderConfirmationIdRouteImport } from './routes/_site.orde
 import { Route as SiteCollectionSlugRouteImport } from './routes/_site.collection.$slug'
 import { Route as SiteCategorySlugRouteImport } from './routes/_site.category.$slug'
 
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SiteRoute = SiteRouteImport.update({
   id: '/_site',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const SiteIndexRoute = SiteIndexRouteImport.update({
   id: '/',
@@ -114,6 +126,7 @@ const SiteCategorySlugRoute = SiteCategorySlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof SiteIndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/about': typeof SiteAboutRoute
   '/cart': typeof SiteCartRoute
   '/checkout': typeof SiteCheckoutRoute
@@ -125,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof SiteSearchRoute
   '/terms': typeof SiteTermsRoute
   '/track': typeof SiteTrackRoute
+  '/admin/': typeof AdminIndexRoute
   '/category/$slug': typeof SiteCategorySlugRoute
   '/collection/$slug': typeof SiteCollectionSlugRoute
   '/order-confirmation/$id': typeof SiteOrderConfirmationIdRoute
@@ -143,6 +157,7 @@ export interface FileRoutesByTo {
   '/terms': typeof SiteTermsRoute
   '/track': typeof SiteTrackRoute
   '/': typeof SiteIndexRoute
+  '/admin': typeof AdminIndexRoute
   '/category/$slug': typeof SiteCategorySlugRoute
   '/collection/$slug': typeof SiteCollectionSlugRoute
   '/order-confirmation/$id': typeof SiteOrderConfirmationIdRoute
@@ -151,6 +166,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_site': typeof SiteRouteWithChildren
+  '/admin': typeof AdminRouteWithChildren
   '/_site/about': typeof SiteAboutRoute
   '/_site/cart': typeof SiteCartRoute
   '/_site/checkout': typeof SiteCheckoutRoute
@@ -163,6 +179,7 @@ export interface FileRoutesById {
   '/_site/terms': typeof SiteTermsRoute
   '/_site/track': typeof SiteTrackRoute
   '/_site/': typeof SiteIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/_site/category/$slug': typeof SiteCategorySlugRoute
   '/_site/collection/$slug': typeof SiteCollectionSlugRoute
   '/_site/order-confirmation/$id': typeof SiteOrderConfirmationIdRoute
@@ -172,6 +189,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/about'
     | '/cart'
     | '/checkout'
@@ -183,6 +201,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/terms'
     | '/track'
+    | '/admin/'
     | '/category/$slug'
     | '/collection/$slug'
     | '/order-confirmation/$id'
@@ -201,6 +220,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/track'
     | '/'
+    | '/admin'
     | '/category/$slug'
     | '/collection/$slug'
     | '/order-confirmation/$id'
@@ -208,6 +228,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_site'
+    | '/admin'
     | '/_site/about'
     | '/_site/cart'
     | '/_site/checkout'
@@ -220,6 +241,7 @@ export interface FileRouteTypes {
     | '/_site/terms'
     | '/_site/track'
     | '/_site/'
+    | '/admin/'
     | '/_site/category/$slug'
     | '/_site/collection/$slug'
     | '/_site/order-confirmation/$id'
@@ -228,16 +250,31 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   SiteRoute: typeof SiteRouteWithChildren
+  AdminRoute: typeof AdminRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_site': {
       id: '/_site'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof SiteRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/_site/': {
       id: '/_site/'
@@ -394,8 +431,19 @@ const SiteRouteChildren: SiteRouteChildren = {
 
 const SiteRouteWithChildren = SiteRoute._addFileChildren(SiteRouteChildren)
 
+interface AdminRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   SiteRoute: SiteRouteWithChildren,
+  AdminRoute: AdminRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
